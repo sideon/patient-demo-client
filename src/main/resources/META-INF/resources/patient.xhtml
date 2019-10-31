@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:f="http://java.sun.com/jsf/core">
+<f:event listener="#{patientBean.isUserLogin}" type="preRenderView" />
+
+<h:head>
+  	<title>Patient Web Demo : Search Patient</title>
+</h:head>
+
+<h:body>
+  <h:form id="frmPatient">
+	<p:growl id="growl" life="2000" />
+	<p:panel header="Search Patient" id="pnlSearch">
+		<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%">
+			<p:outputLabel for="txtseacrhfirstname" value="First Name" />
+			<p:inputText id="txtseacrhfirstname" value="#{patientBean.model.firstname}"/>
+			
+			<p:outputLabel for="txtsearchlastname" value="Last Name" />
+			<p:inputText id="txtsearchlastname" value="#{patientBean.model.lastname}"/>
+			
+			<p:outputLabel for="selsearchcountry" value="Country" />
+			<p:selectOneMenu value="#{patientBean.model.country}" id="selsearchcountry">
+                 <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+                 <f:selectItem itemLabel="Denmark" itemValue="DK"></f:selectItem>
+                 <f:selectItem itemLabel="France" itemValue="FR"></f:selectItem>
+                 <f:selectItem itemLabel="Great Britain" itemValue="BR"></f:selectItem>
+                 <f:selectItem itemLabel="Russia" itemValue="RU"></f:selectItem>
+                 <f:selectItem itemLabel="Singapore" itemValue="SG"></f:selectItem>
+                 <f:selectItem itemLabel="Spain" itemValue="ES"></f:selectItem>
+                 <f:selectItem itemLabel="United States" itemValue="US"></f:selectItem>
+             </p:selectOneMenu>
+		</p:panelGrid>
+		<p:spacer></p:spacer>
+		<f:facet name="footer">
+            <p:commandButton value="Search"
+							 process="pnlSearch"
+							 action="#{patientBean.search}" 
+							 update="tblPatient pnlSearch growl"
+							 styleClass="ui-priority-primary" />
+			<p:commandButton value="Clear"
+							 update="tblPatient pnlSearch growl"
+							 action="#{patientBean.clear}" 
+							 styleClass="ui-priority-primary">
+			</p:commandButton>				 	
+        	</f:facet>
+	</p:panel>	
+	
+	<p:spacer></p:spacer>
+	
+    <p:panel header="List of Patients">
+    	 <p:dataTable var="patient" 
+    	 			  value="#{patientBean.model}" 
+    	 			  paginator="true" 
+    	 			  rows="10"
+    	 			  id="tblPatient"
+    	 			  widgetVar="tblPatient"
+                 	  selectionMode="single" 
+                 	  selection="#{patientBean.selected}" 
+                 	  paginatorPosition="bottom"
+                 	  lazy="true">
+	        <p:ajax event="rowSelect" 
+	        		listener="#{patientBean.onRowSelect}" 
+	        		update=":frmPatient:pnlPatientDetails :frmPatient:growl" 
+	        		oncomplete="PF('dlgPatientDetails').show()" />         	  
+	        <p:column headerText="First Name">
+	            <h:outputText value="#{patient.firstname}" />
+	        </p:column>
+	        <p:column headerText="Last Name">
+	            <h:outputText value="#{patient.lastname}" />
+	        </p:column>
+	        <p:column headerText="Contact No">
+	            <h:outputText value="#{patient.contactNo}" />
+	        </p:column>
+	        <p:column headerText="Status">
+	            <h:outputText value="#{patient.status}" />
+	        </p:column>
+	        <f:facet name="header">
+	        	<p:outputPanel style="text-align: right;">
+		        	<p:outputLabel for="selstatusfilter" value="Filter: " />
+	                <p:selectOneMenu  value="#{patientBean.model.status}" id="selstatusfilter">
+	                    <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+	                    <f:selectItem itemLabel="Active" itemValue="Active"></f:selectItem>
+	                    <f:selectItem itemLabel="Inactive" itemValue="Inactive"></f:selectItem>
+	                    <p:ajax event="change" update=":frmPatient:tblPatient" />
+	                </p:selectOneMenu>
+                </p:outputPanel>
+            </f:facet>
+	    </p:dataTable>
+	    <f:facet name="footer">
+	    	 <p:commandButton value="Add Patient"
+							  process="@this"
+							  action="#{patientBean.add}" 
+							  update="pnlAddPatientDetails"
+							  oncomplete="PF('dlgAddPatientDetails').show()"   
+							  styleClass="ui-priority-primary" />
+	    </f:facet>
+	</p:panel>
+	
+	<p:dialog header="Patient Details" 
+			  widgetVar="dlgPatientDetails" 
+			  modal="true" 
+			  showEffect="fade" 
+			  hideEffect="fade" 
+			  resizable="false">
+		<p:outputPanel id="pnlPatientDetails" style="text-align:center;">
+			<p:panel>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%">
+					<p:outputLabel for="txtfirstname" value="First Name" />
+					<h:panelGroup>
+						<p:inputText id="txtfirstname" value="#{patientBean.selected.firstname}" required="true" requiredMessage="Enter First Name" maxlength="60"/>
+						<p:message for="txtfirstname" />
+					</h:panelGroup>
+					
+					
+					<p:outputLabel for="txtlastname" value="Last Name" />
+					<h:panelGroup>
+						<p:inputText id="txtlastname" value="#{patientBean.selected.lastname}" required="true" requiredMessage="Enter Last Name" maxlength="60"/>
+						<p:message for="txtlastname" />
+					</h:panelGroup>
+					
+					<p:outputLabel for="txtcontact" value="Contact No" />
+					<p:inputText id="txtcontact" value="#{patientBean.selected.contactNo}" maxlength="10"/>
+					
+					<p:outputLabel for="txtstatus" value="Status"/>
+					<h:outputText id="txtstatus" value="#{patientBean.selected.status}"></h:outputText>
+				</p:panelGrid>
+				<p:spacer></p:spacer>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%; text-align: left;">
+					<f:facet name="header">
+						<h:outputText value="Address 1"></h:outputText>
+					</f:facet>
+					<p:outputLabel for="txtline101" value="Line 1"/>
+					<p:inputText id="txtline101" value="#{patientBean.selected.addresses[0].line1}" maxlength="60"/>
+					
+					<p:outputLabel for="txtline201" value="Line 2" />
+					<p:inputText id="txtline201" value="#{patientBean.selected.addresses[0].line2}" maxlength="60"/>
+					
+					<p:outputLabel for="txtcity01" value="City" />
+					<p:inputText id="txtcity01" value="#{patientBean.selected.addresses[0].city}" maxlength="60"/>
+					
+					<p:outputLabel for="selcountry01" value="Country" />
+					<p:selectOneMenu value="#{patientBean.selected.addresses[0].country}" id="selcountry01">
+		                 <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+		                 <f:selectItem itemLabel="Denmark" itemValue="DK"></f:selectItem>
+		                 <f:selectItem itemLabel="France" itemValue="FR"></f:selectItem>
+		                 <f:selectItem itemLabel="Great Britain" itemValue="BR"></f:selectItem>
+		                 <f:selectItem itemLabel="Russia" itemValue="RU"></f:selectItem>
+		                 <f:selectItem itemLabel="Singapore" itemValue="SG"></f:selectItem>
+		                 <f:selectItem itemLabel="Spain" itemValue="ES"></f:selectItem>
+		                 <f:selectItem itemLabel="United States" itemValue="US"></f:selectItem>
+		             </p:selectOneMenu>
+					
+					<p:outputLabel for="txtpostal01" value="Postal Code" />
+					<p:inputText id="txtpostal01" value="#{patientBean.selected.addresses[0].postal}" maxlength="8"/>
+				</p:panelGrid>
+				<p:spacer></p:spacer>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%; text-align: left;">
+					<f:facet name="header">
+						<h:outputText value="Address 2"></h:outputText>
+					</f:facet>
+					<p:outputLabel for="txtline102" value="Line 2"/>
+					<p:inputText id="txtline102" value="#{patientBean.selected.addresses[1].line1}" maxlength="60"/>
+					
+					<p:outputLabel for="txtline202" value="Line 2" />
+					<p:inputText id="txtline202" value="#{patientBean.selected.addresses[1].line2}" maxlength="60"/>
+					
+					<p:outputLabel for="txtcity02" value="City" />
+					<p:inputText id="txtcity02" value="#{patientBean.selected.addresses[1].city}" maxlength="60"/>
+					
+					<p:outputLabel for="selcountry02" value="Country" />
+					<p:selectOneMenu value="#{patientBean.selected.addresses[1].country}" id="selcountry02">
+		                 <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+		                 <f:selectItem itemLabel="Denmark" itemValue="DK"></f:selectItem>
+		                 <f:selectItem itemLabel="France" itemValue="FR"></f:selectItem>
+		                 <f:selectItem itemLabel="Great Britain" itemValue="BR"></f:selectItem>
+		                 <f:selectItem itemLabel="Russia" itemValue="RU"></f:selectItem>
+		                 <f:selectItem itemLabel="Singapore" itemValue="SG"></f:selectItem>
+		                 <f:selectItem itemLabel="Spain" itemValue="ES"></f:selectItem>
+		                 <f:selectItem itemLabel="United States" itemValue="US"></f:selectItem>
+		             </p:selectOneMenu>
+					
+					<p:outputLabel for="txtpostal02" value="Postal Code" />
+					<p:inputText id="txtpostal02" value="#{patientBean.selected.addresses[1].postal}" maxlength="8"/>
+				</p:panelGrid>
+				<f:facet name="footer">
+		            <p:commandButton value="Update"
+									 update="growl :frmPatient:tblPatient pnlPatientDetails" 
+									 process="pnlPatientDetails"
+									 action="#{patientBean.update}" 
+									 oncomplete="callbackUpdate(xhr, status, args)"
+									 styleClass="ui-priority-primary" />
+					<p:commandButton value="Delete"
+									 update="growl :frmPatient:tblPatient pnlPatientDetails" 
+									 action="#{patientBean.delete}" 
+									 oncomplete="callbackUpdate(xhr, status, args)"
+									 styleClass="ui-priority-primary">
+						<p:confirm header="Delete Confirmation" message="Do you want to continue?" icon="pi pi-exclamation-triangle" />			 
+					</p:commandButton>				 	
+					<p:commandButton value="Deactivate"
+									 update="growl :frmPatient:tblPatient pnlPatientDetails" 
+									 process="pnlPatientDetails"
+									 action="#{patientBean.deactivate}" 
+									 oncomplete="callbackUpdate(xhr, status, args)"
+									 rendered="#{patientBean.selected.status eq 'Active'}"
+									 styleClass="ui-priority-primary">
+						<p:confirm header="Deactivate Confirmation" message="Do you want to continue?" icon="pi pi-exclamation-triangle" />				 
+					</p:commandButton>				 				 
+	         	</f:facet>
+			</p:panel>	
+		</p:outputPanel>
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+	        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+	        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+	    </p:confirmDialog>      
+	</p:dialog>
+	
+	<p:dialog header="Patient Details" 
+			  widgetVar="dlgAddPatientDetails" 
+			  modal="true" 
+			  showEffect="fade" 
+			  hideEffect="fade" 
+			  resizable="false">
+		<p:outputPanel id="pnlAddPatientDetails" style="text-align:center;">
+			<p:panel>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%">
+					<p:outputLabel for="txtaddfirstname" value="First Name" />
+					<h:panelGroup>
+						<p:inputText id="txtaddfirstname" value="#{patientBean.added.firstname}" required="true" requiredMessage="Enter First Name" maxlength="60"/>
+						<p:message for="txtaddfirstname" />
+					</h:panelGroup>
+					
+					
+					<p:outputLabel for="txtaddlastname" value="Last Name" />
+					<h:panelGroup>
+						<p:inputText id="txtaddlastname" value="#{patientBean.added.lastname}" required="true" requiredMessage="Enter Last Name" maxlength="60"/>
+						<p:message for="txtaddlastname" />
+					</h:panelGroup>
+					
+					<p:outputLabel for="txtaddcontact" value="Contact No" />
+					<p:inputText id="txtaddcontact" value="#{patientBean.added.contactNo}" maxlength="10"/>
+				</p:panelGrid>
+				<p:spacer></p:spacer>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%; text-align: left;">
+					<f:facet name="header">
+						<h:outputText value="Address 1"></h:outputText>
+					</f:facet>
+					<p:outputLabel for="txtaddline101" value="Line 1"/>
+					<p:inputText id="txtaddline101" value="#{patientBean.added.addresses[0].line1}" maxlength="60"/>
+					
+					<p:outputLabel for="txtaddline201" value="Line 2" />
+					<p:inputText id="txtaddline201" value="#{patientBean.added.addresses[0].line2}" maxlength="60"/>
+					
+					<p:outputLabel for="txtaddcity01" value="City" />
+					<p:inputText id="txtaddcity01" value="#{patientBean.added.addresses[0].city}" maxlength="60"/>
+					
+					<p:outputLabel for="seladdcountry01" value="Country" />
+					<p:selectOneMenu value="#{patientBean.added.addresses[0].country}" id="seladdcountry01">
+		                 <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+		                 <f:selectItem itemLabel="Denmark" itemValue="DK"></f:selectItem>
+		                 <f:selectItem itemLabel="France" itemValue="FR"></f:selectItem>
+		                 <f:selectItem itemLabel="Great Britain" itemValue="BR"></f:selectItem>
+		                 <f:selectItem itemLabel="Russia" itemValue="RU"></f:selectItem>
+		                 <f:selectItem itemLabel="Singapore" itemValue="SG"></f:selectItem>
+		                 <f:selectItem itemLabel="Spain" itemValue="ES"></f:selectItem>
+		                 <f:selectItem itemLabel="United States" itemValue="US"></f:selectItem>
+		             </p:selectOneMenu>
+					
+					<p:outputLabel for="txtaddpostal01" value="Postal Code" />
+					<p:inputText id="txtaddpostal01" value="#{patientBean.added.addresses[0].postal}" maxlength="8"/>
+				</p:panelGrid>
+				<p:spacer></p:spacer>
+				<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%; text-align: left;">
+					<f:facet name="header">
+						<h:outputText value="Address 2"></h:outputText>
+					</f:facet>
+					<p:outputLabel for="txtaddline102" value="Line 2"/>
+					<p:inputText id="txtaddline102" value="#{patientBean.added.addresses[1].line1}" maxlength="60"/>
+					
+					<p:outputLabel for="txtaddline202" value="Line 2" />
+					<p:inputText id="txtaddline202" value="#{patientBean.added.addresses[1].line2}" maxlength="60"/>
+					
+					<p:outputLabel for="txtaddcity02" value="City" />
+					<p:inputText id="txtaddcity02" value="#{patientBean.added.addresses[1].city}" maxlength="60"/>
+					
+					<p:outputLabel for="seladdcountry02" value="Country" />
+					<p:selectOneMenu value="#{patientBean.added.addresses[1].country}" id="seladdcountry02">
+		                 <f:selectItem itemLabel="Select" itemValue="" noSelectionOption="true" />
+		                 <f:selectItem itemLabel="Denmark" itemValue="DK"></f:selectItem>
+		                 <f:selectItem itemLabel="France" itemValue="FR"></f:selectItem>
+		                 <f:selectItem itemLabel="Great Britain" itemValue="BR"></f:selectItem>
+		                 <f:selectItem itemLabel="Russia" itemValue="RU"></f:selectItem>
+		                 <f:selectItem itemLabel="Singapore" itemValue="SG"></f:selectItem>
+		                 <f:selectItem itemLabel="Spain" itemValue="ES"></f:selectItem>
+		                 <f:selectItem itemLabel="United States" itemValue="US"></f:selectItem>
+		             </p:selectOneMenu>
+					
+					<p:outputLabel for="txtaddpostal02" value="Postal Code" />
+					<p:inputText id="txtaddpostal02" value="#{patientBean.added.addresses[1].postal}" maxlength="8"/>
+				</p:panelGrid>
+				<f:facet name="footer">
+		            <p:commandButton value="Submit"
+									 update="growl :frmPatient:tblPatient pnlAddPatientDetails" 
+									 process="pnlAddPatientDetails"
+									 action="#{patientBean.submitAdd}" 
+									 oncomplete="callbackAdd(xhr, status, args)"
+									 styleClass="ui-priority-primary" />
+					<p:commandButton value="Cancel"
+									 update="growl" 
+									 action="#{patientBean.cancelAdd}" 
+									 oncomplete="PF('dlgAddPatientDetails').hide();"
+									 styleClass="ui-priority-primary">
+						<p:confirm header="Cancel Confirmation" message="Do you want to continue?" icon="pi pi-exclamation-triangle" />			 
+					</p:commandButton>				 	
+	         	</f:facet>
+			</p:panel>	
+		</p:outputPanel>
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+	        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+	        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+	    </p:confirmDialog>      
+	</p:dialog>
+	<script type="text/javascript">  
+	    function callbackUpdate(xhr, status, args) {  
+	        if(args.success) {  
+	        	PF('dlgPatientDetails').hide();
+	        } 
+	    }  
+	    
+	    function callbackAdd(xhr, status, args) {  
+	        if(args.success) {  
+	        	PF('dlgAddPatientDetails').hide();
+	        } 
+	    }  
+	</script>
+  </h:form>
+</h:body>
+</html>

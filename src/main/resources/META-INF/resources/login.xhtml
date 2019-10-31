@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:f="http://java.sun.com/jsf/core">
+
+<h:head>
+  	<title>Patient Web Demo : Login</title>
+  	<!-- The core Firebase JS SDK is always required and must be listed first -->
+  	 <script src="https://www.gstatic.com/firebasejs/7.2.2/firebase-app.js"></script>
+
+	  <!-- Add Firebase products that you want to use -->
+  	<script src="https://www.gstatic.com/firebasejs/7.2.2/firebase-auth.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+	<script>
+	  // Your web app's Firebase configuration
+	  var firebaseConfig = {
+	    apiKey: "AIzaSyA_8e6jZCV0Wm5zyUh-fX4NaQrOLboGuoI",
+	    authDomain: "patientdemo-205da.firebaseapp.com",
+	    databaseURL: "https://patientdemo-205da.firebaseio.com",
+	    projectId: "patientdemo-205da",
+	    storageBucket: "patientdemo-205da.appspot.com",
+	    messagingSenderId: "753568096371",
+	    appId: "1:753568096371:web:4325b2ba65539eaceb4a06"
+	  };
+	  // Initialize Firebase
+	  firebase.initializeApp(firebaseConfig);
+	</script>
+</h:head>
+
+<h:body>
+  <h:form id="frmLogin">
+	<h1>Welcome to Patient Web Demo!</h1>
+	<p:growl id="growl" life="2000" />
+	<p:panel header="Login" id="pnlLogin">
+		<p:panelGrid  columns="2" columnClasses="label,value" style="width:100%">
+			<p:outputLabel for="txtEmail" value="Email" />
+			<h:panelGroup>
+				<p:inputText id="txtEmail" value="#{patientBean.user.email}" required="true" requiredMessage="Enter Email"/>
+				<p:message for="txtEmail" />
+			</h:panelGroup>
+			
+			<p:outputLabel for="txtPassword" value="Password" />
+			<h:panelGroup>
+				<p:password id="txtPassword" value="#{patientBean.user.password}" required="true" requiredMessage="Enter Password"/>
+				<p:message for="txtPassword" />
+			</h:panelGroup>
+			
+			<f:facet name="footer">
+		            <p:commandButton value="Login"
+									 update="growl pnlLogin" 
+									 process="pnlLogin"
+									 action="#{patientBean.login}" 
+									 oncomplete="callbackLogin(xhr, status, args)"
+									 styleClass="ui-priority-primary" />								 
+	         	</f:facet>
+		</p:panelGrid>
+	</p:panel>	
+	
+	<p:remoteCommand name="updateToken" actionListener="#{patientBean.updateToken}" process="@this"/>		
+	
+	<script type="text/javascript">  
+		function callbackLogin(xhr, status, args) {  
+	        if(args.success) {  
+	        	login(args.email, args.password);
+	        } 
+	    }  
+	    function login(email, password) {  
+	    	firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+	            // Handle Errors here.
+	            var errorCode = error.code;
+	            var errorMessage = error.message;
+	            // [START_EXCLUDE]
+	            if (errorCode === 'auth/wrong-password') {
+	             	alert('Wrong password.');
+	            } else {
+	              	alert(errorMessage);
+	            }
+	            console.log(error);
+	       	}).then(function(result){
+	       		result.user.getIdToken().then(function(idToken) {
+	                console.log(idToken); 
+	                updateToken([{ 'name' : 'token', 'value' : idToken}]);
+	                $(location).attr('href', 'patient.xhtml');
+	             });
+	       	});
+	    }  
+	</script>		
+  </h:form>
+</h:body>
+</html>
