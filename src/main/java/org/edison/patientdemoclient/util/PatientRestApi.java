@@ -11,7 +11,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class PatientRestApi {
-	private static final String PATIENT_ENDPOINT = "http://localhost:9090/patients";
+	//private static final String PATIENT_ENDPOINT = "http://localhost:9090/patients";
+	private static final String PATIENT_ENDPOINT = "https://patientdemoapi.herokuapp.com/patients";
+	
 	private final static String TOKEN_HEADER = "X-Firebase-Auth";
 	
 	public static PatientPage search(String firstname, String lastname, String country, String status, int page, int size, String accessToken) {
