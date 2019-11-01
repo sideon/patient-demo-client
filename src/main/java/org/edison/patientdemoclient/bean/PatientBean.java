@@ -102,6 +102,9 @@ public class PatientBean {
     }
 	
 	public void search() {
+		// reset the status filter
+		model.setStatus(null);
+		
         addMessage("Searched");
     }
 	
@@ -159,15 +162,26 @@ public class PatientBean {
 	
 	public void isUserLogin(ComponentSystemEvent event){
 		FirebaseUser user = getUser();
-		if (Strings.isEmpty(user.getToken())) {
-			FacesContext context = FacesContext.getCurrentInstance();
-			HttpServletResponse response = (HttpServletResponse)context.getExternalContext().getResponse();
+		if (!Strings.isEmpty(user.getToken())) {
 			try {
-				response.sendRedirect("login.xhtml");
-				FacesContext.getCurrentInstance().responseComplete();
-			} catch (IOException e) {
-				e.printStackTrace();
+				PatientRestApi.verifyToken(user.getToken());
+			} catch (Throwable e) {
+				// probably expired token
+				loginRedirect();
 			}
+		} else {
+			loginRedirect();
+		}
+	}
+	
+	private void loginRedirect() {
+		FacesContext context = FacesContext.getCurrentInstance();
+		HttpServletResponse response = (HttpServletResponse)context.getExternalContext().getResponse();
+		try {
+			response.sendRedirect("login.xhtml");
+			FacesContext.getCurrentInstance().responseComplete();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

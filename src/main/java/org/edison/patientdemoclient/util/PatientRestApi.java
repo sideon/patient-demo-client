@@ -93,6 +93,16 @@ public class PatientRestApi {
 		HttpEntity<Patient> entity = new HttpEntity<Patient>(patient, headers);
 		
 		restTemplate.exchange(PATIENT_ENDPOINT, HttpMethod.POST, entity, Patient.class);
+	}
+	
+	public static void verifyToken(String accessToken) {
+		RestTemplate restTemplate = new RestTemplate();
 		
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(TOKEN_HEADER, accessToken);   
+		
+		HttpEntity<Patient> entity = new HttpEntity<Patient>(headers);
+		
+		restTemplate.exchange(PATIENT_ENDPOINT + "/verifytoken", HttpMethod.POST, entity, String.class);
 	}
 }

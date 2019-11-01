@@ -33,11 +33,6 @@ public class LazyPatientDataModel  extends LazyDataModel<Patient> {
 	
 	@Override
 	public List<Patient> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
-		System.out.println("firstname: " + firstname);
-		System.out.println("lastname: " + lastname);
-		System.out.println("country: " + country);
-		System.out.println("status: " + status);
-		
 		PatientPage page = 
 				PatientRestApi.search(firstname, lastname, country, status, first > 0 ? first/pageSize : first, pageSize, token);
 		 
